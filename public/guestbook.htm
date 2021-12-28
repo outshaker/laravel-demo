@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <script src="./axios.min.js"></script>
+    <link href="./style.css" type="text/css" rel="stylesheet" />
+    <link href="./favicon.ico" rel="shortcut icon">
+  </head>
+  <body>
+    <title>心情留言板</title>
+    <div class="bar">
+      <button type="button" onclick="getComments()">🔄</button>
+      <input type="text" name="name" placeholder="大名" id="name" size="12"/>
+      <input type="text" name="content" placeholder="我想說..." id="content" size="50"/>
+      <button type="button" onclick="addComment()">送出</button>
+    </div>
+  <div class='cards'>
+  </div>
+  <script>
+    const API_URL = 'https://demo.outshaker.tw/api/comments'
+    const loader = document.querySelector('.cards')
+    const getComments = () => {
+      axios.get(API_URL)
+        .then(function ({data:list}) {
+          loader.innerHTML = ''
+          list.forEach((e) => {
+            const card = document.createElement('div')
+            card.classList.add('card')
+            card.innerHTML = `
+  <div class="card-info">
+    <span class="card-user">${e.name}</span>
+    <span class="card-time">${e.created_at.slice(0, 19)}</span>
+  </div>
+  <div class="card-content">${e.content}</div>
+`
+            loader.insertBefore(card, loader.firstChild);
+            // loader.appendChild(card)
+          })
+        })
+          .catch(function (error) {
+            console.log(error);
+        })
+          // .finally(function () {
+        // });
+    }
+    const addComment = (e) => {
+      const eName = document.querySelector('#name')
+      const eContent = document.querySelector('#content')
+      if (!eName.value || !eContent.value) {
+        e.stopPropagation()
+        return false
+      }
+      console.log(eName.value, eContent.value)
+      axios.post(API_URL, {name: eName.value, content: eContent.value})
+        .then(function ({data:item}) {
+            const card = document.createElement('div')
+            card.classList.add('card')
+            card.innerHTML = `
+  <div class="card-info">
+    <span class="card-user">${item.name}</span>
+    <span class="card-time">${item.created_at.slice(0, 19)}</span>
+  </div>
+  <div class="card-content">${item.content}</div>
+`
+            loader.insertBefore(card, loader.firstChild);
+        })
+        .catch(function (error) {
+          console.log(error);
+        })
+        // .finally(function () {
+        // });
+    }
+    window.addEventListener('DOMContentLoaded', getComments);
+  </script>
+  </body>
+</html>
+
